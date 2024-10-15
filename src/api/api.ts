@@ -1,5 +1,5 @@
 
-const API_BASE_URL = 'https://backend.vella.com';
+const API_BASE_URL = 'https://vella-backend.onrender.com/api/v1';
 
 
 async function getData<T>(endpoint: string): Promise<T> {
