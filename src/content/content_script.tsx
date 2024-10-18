@@ -4,6 +4,8 @@ import ReactDOM from 'react-dom/client';
 import "./index.css";
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
+import { Trash } from 'lucide-react';
+
 
 type Props = {};
 
@@ -57,6 +59,18 @@ const ContentScript = (props: Props) => {
         }
     }
 
+    const handleDeletePage = () => {
+        setStatus("loading");
+        chrome.runtime.sendMessage({ type: 'deletePage' }, (response) => {
+            if (response.data) {
+                setPageData(null);
+                setDescription(undefined);
+                setStatus("success");
+                setTimeout(() => setStatus(undefined), 2000);
+            }
+        });
+    }
+
     const handleHover = (hovering: boolean) => {
         setIsHovered(hovering);
     }
@@ -69,9 +83,35 @@ const ContentScript = (props: Props) => {
             onMouseEnter={() => handleHover(true)}
             onMouseLeave={() => handleHover(false)}
         >
-            {pageData && pageData.description && <div style={{ backgroundColor: "white", color: "#4c6daf", padding: 5, borderRadius: 5, fontSize: 10, maxWidth: 250, height: "auto" }}> {pageData.description}</div>}
-            {isHovered && <Input autoFocus onChange={(e) => setDescription(e.target.value)} placeholder="Description (Optional)" />}
-            <Button onClick={() => handleSavePage()}>{pageData ? "Update page" : "Save page"}</Button>
+        {pageData && pageData.description && (
+            <div 
+                style={{ 
+                backgroundColor: "white",
+                color: "#4c6daf",
+                padding: 5,
+                borderRadius: 5,
+                fontSize: 10,
+                maxWidth: 250,
+                whiteSpace: "pre-wrap",
+                wordWrap: "break-word",
+                overflowWrap: "break-word"
+                }}
+            > 
+                {pageData.description}
+            </div>
+        )}
+        {isHovered && <Input autoFocus onChange={(e) => setDescription(e.target.value)} placeholder="Description (Optional)" />}
+            <div style={{ display: "flex", justifyContent: "end", alignItems: "center" }}>
+                <Button onClick={() => handleSavePage()}>{pageData ? "Update page" : "Save page"}</Button>
+                {pageData && 
+                    <Trash 
+                        onMouseEnter={() => handleHover(false)}
+                        onMouseLeave={() => handleHover(true)}
+                        onClick={()=> handleDeletePage()}
+                        style={{ color: "red", cursor: "pointer" }}
+                    />
+                }
+            </div>
             <div style={{ fontSize: 10, position: "absolute", bottom: -10, right: 0 }}>{status}</div>
         </div>
     );

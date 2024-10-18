@@ -1,4 +1,4 @@
-import { getData, postData, updateData } from "../api/api";
+import { deleteData, getData, postData, updateData } from "../api/api";
 
 
 chrome.runtime.onInstalled.addListener((details) => {
@@ -7,23 +7,6 @@ chrome.runtime.onInstalled.addListener((details) => {
   }
 });
 let canMakeRequest = true;
-
-// async function handleTextSelectedMessage(
-//   message: { type: string; shortcut_id: string; text: string; },
-//   sender: chrome.runtime.MessageSender,
-//   sendResponse: (response?: any) => void
-// ) {
-//   try {
-//     if (!canMakeRequest) return;
-//     canMakeRequest = false;
-
-
-//   } catch (error: any) {
-//     console.error(error.message);
-//   } finally {
-//     canMakeRequest = true;
-//   }
-// }
 
 async function handleIsPageSavedMessage(
   message: { type: string; },
@@ -85,6 +68,26 @@ async function handleUpdatePageMessage(
   }
 }
 
+async function handleDeletePageMessage(
+  message: { type: string; },
+  sender: chrome.runtime.MessageSender,
+  sendResponse: (response?: any) => void
+) {
+  try {
+    if (!canMakeRequest) return;
+    canMakeRequest = false;
+
+    const response = await deleteData(`pages/${sender.tab?.url}`);
+
+    sendResponse(response);
+
+  } catch (error: any) {
+    console.error(error.message);
+  } finally {
+    canMakeRequest = true;
+  }
+}
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   if (message.type === 'checkSaved'){
@@ -95,6 +98,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
   if (message.type === 'updatePage'){
     handleUpdatePageMessage(message, sender, sendResponse);
+  }
+  if (message.type === 'deletePage'){
+    handleDeletePageMessage(message, sender, sendResponse);
   }
 
   return true;
