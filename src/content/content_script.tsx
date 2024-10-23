@@ -18,15 +18,17 @@ const ContentScript = (props: Props) => {
     const [user, setUser] = useState<{ _id: string, username: string } | null>(null);
 
     useEffect(() => {
+        chrome.runtime.sendMessage({ type: 'getUser' }, (response) => {
+            setUser(response.data);
+        });
+    }, []);
+
+    useEffect(() => {
         setStatus("loading");
         chrome.runtime.sendMessage({ type: 'checkSaved' }, (response) => {
             setPageData(response.data);
             setStatus("success");
             setTimeout(() => setStatus(undefined), 2000);
-        });
-
-        chrome.runtime.sendMessage({ type: 'getUser' }, (response) => {
-            setUser(response.data);
         });
     }, []);
 

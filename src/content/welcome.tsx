@@ -21,7 +21,7 @@ const Welcome = (props: Props) => {
                 left: 0, 
                 right: 0, 
                 bottom: 0, 
-                backgroundImage: "url(/icon.jpg)", 
+                backgroundImage: "url(/icon.png)", 
                 backgroundSize: "cover", 
                 backgroundPosition: "center",
                 backgroundAttachment: "fixed",

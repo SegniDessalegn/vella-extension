@@ -17,7 +17,7 @@ async function handleGetUserMessage(
     if (!canMakeRequest) return;
     canMakeRequest = false;
 
-    const response = await getData('users');
+    const response = await getData('user');
 
     sendResponse(response);
 
