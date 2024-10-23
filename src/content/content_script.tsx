@@ -15,6 +15,7 @@ const ContentScript = (props: Props) => {
     const [isHovered, setIsHovered] = useState<boolean>(false);
     const [description, setDescription] = useState<string | undefined>(undefined);
     const [status, setStatus] = useState<"loading" | "success" | "error" | undefined>("loading");
+    const [user, setUser] = useState<{ _id: string, username: string } | null>(null);
 
     useEffect(() => {
         setStatus("loading");
@@ -22,6 +23,10 @@ const ContentScript = (props: Props) => {
             setPageData(response.data);
             setStatus("success");
             setTimeout(() => setStatus(undefined), 2000);
+        });
+
+        chrome.runtime.sendMessage({ type: 'getUser' }, (response) => {
+            setUser(response.data);
         });
     }, []);
 
@@ -36,7 +41,11 @@ const ContentScript = (props: Props) => {
         });
     }, []);
 
-    const handleSavePage = () => {
+    const handleClick = () => {
+        if (!user) {
+            window.open('/login-page', '_blank');
+            return;
+        }
         setStatus("loading");
         if (pageData === null) {
             chrome.runtime.sendMessage({ type: 'savePage', page: document.body.innerHTML, description: description }, (response) => {
@@ -100,9 +109,9 @@ const ContentScript = (props: Props) => {
                 {pageData.description}
             </div>
         )}
-        {isHovered && <Input autoFocus onChange={(e) => setDescription(e.target.value)} placeholder="Description (Optional)" />}
+        {isHovered && user && <Input autoFocus onChange={(e) => setDescription(e.target.value)} placeholder="Description (Optional)" />}
             <div style={{ display: "flex", justifyContent: "end", alignItems: "center" }}>
-                <Button onClick={() => handleSavePage()}>{pageData ? "Update page" : "Save page"}</Button>
+                <Button onClick={() => handleClick()}>{!user ? "Login" : pageData ? "Update page" : "Save page"}</Button>
                 {pageData && 
                     <Trash 
                         onMouseEnter={() => handleHover(false)}

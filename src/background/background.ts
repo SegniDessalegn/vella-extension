@@ -8,6 +8,26 @@ chrome.runtime.onInstalled.addListener((details) => {
 });
 let canMakeRequest = true;
 
+async function handleGetUserMessage(
+  message: { type: string; },
+  sender: chrome.runtime.MessageSender,
+  sendResponse: (response?: any) => void
+) {
+  try {
+    if (!canMakeRequest) return;
+    canMakeRequest = false;
+
+    const response = await getData('users');
+
+    sendResponse(response);
+
+  } catch (error: any) {
+    console.error(error.message);
+  } finally {
+    canMakeRequest = true;
+  }
+}
+
 async function handleIsPageSavedMessage(
   message: { type: string; },
   sender: chrome.runtime.MessageSender,
@@ -89,7 +109,9 @@ async function handleDeletePageMessage(
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-
+  if (message.type === "getUser") {
+    handleGetUserMessage(message, sender, sendResponse);
+  }
   if (message.type === 'checkSaved'){
     handleIsPageSavedMessage(message, sender, sendResponse);
   }
